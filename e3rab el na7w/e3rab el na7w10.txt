@@ -1,0 +1,168 @@
+﻿import tkinter as tk
+import re
+import smtplib
+
+HEIGHT = 300
+WIDTH = 400
+
+root = tk.Tk()
+root.geometry("400x300")
+
+canvas = tk.Canvas(root, height=HEIGHT, width=WIDTH)
+canvas.pack()
+
+root.title("اعراب الجمل")
+root.iconbitmap("NahwIcon.ico")
+
+
+def e3rab():
+    global entry
+    global label
+
+    sentence = entry.get()
+    pattern1 = "[(^ت)(^ي)]"
+    pattern2 = "(^ال)"
+    pattern4 = "[أدجحخهعغقثصضشسنمكطظزوةىرؤءئذل]"
+    low = sentence.split(" ")
+    mobtada = []
+    fe3l = []
+    fa3el = []
+    fe3lmad = []
+    maf3ol_beh = []
+    tme3rab = []
+    hrofgar = ["من", "إلى", "في", "فى"]
+    esmmgror = []
+    asma2_tantahy_be_ta2_marbota = ["القهوة", "الفرشاة"]
+    ekraa = ""
+    for i in range(len(low)):
+        match1 = re.match(pattern1, low[i])
+        match2 = re.match(pattern2, low[i])
+        match4 = re.match(pattern4, low[i])
+        if (match2 or match4) and i == 0 and low[i].endswith(u"ت") is False and len(mobtada) < 1 \
+                and low[i] not in tme3rab and low[i] not in hrofgar:
+            mobtada.append(low[i])
+            tme3rab.append(low[i])
+            ekraa = ekraa + "\n" + low[i] + ": مبتدأ مرفوع بالضمة"
+        if (match1 and len(fe3l) < 1 and low[i] not in tme3rab) or (low[i].startswith("ت") and len(fe3l) < 1
+                                                                    and low[i] not in tme3rab):
+            fe3l.append(low[i])
+            tme3rab.append(low[i])
+            ekraa = ekraa + "\n" + low[i] + ": فعل مضارع مرفوع بالضمة"
+        if low[i].endswith(u"ت") and low[i].endswith("ات") is False and low[i] not in tme3rab:
+            fe3lmad.append(low[i])
+            tme3rab.append(low[i])
+            ekraa = ekraa + "\n" + low[i] + ": فعل ماض مبني على الفتح"
+        if ((match2 or match4) and len(fe3l) > 0 and (re.match(pattern1, low[i - 1]))
+            and len(fa3el) < 1 and len(mobtada) != 1
+            and low[i] not in tme3rab) or (low[i].endswith(u"ة") and low[i - 1].endswith(u"ت")
+                                           and "ta2" not in fa3el and len(fa3el) < 1 and len(mobtada) != 1
+                                           and low[i] not in asma2_tantahy_be_ta2_marbota
+                                           and low[i] not in tme3rab) \
+                and low[i - 1] not in hrofgar:
+            fa3el.append(low[i])
+            tme3rab.append(low[i])
+            ekraa = ekraa + "\n" + low[i] + ": فاعل مرفوع بالضمة"
+        if (low[i-1] in fe3lmad and len(fa3el) < 1 and len(tme3rab) == 1
+            and len(maf3ol_beh) < 1) \
+                or (low[i - 1] in maf3ol_beh and low[i - 2].endswith("ت") and "ta2" not in fa3el
+                    and len(tme3rab) == 1 and len(maf3ol_beh) < 1) \
+                and low[i - 1] not in hrofgar:
+            fa3el.append("ta2")
+            ekraa = ekraa + "\n" + "و التاء ضمير متصل مبني في محل رفع فاعل"
+        if (low[i - 1] in fa3el and low[i - 2] in fe3l and low[i] not in tme3rab and low[i] not in hrofgar) \
+                or (low[i - 1] in fe3l and low[i - 2] in mobtada and low[i] not in tme3rab and low[i] not in hrofgar) \
+                or (low[i - 1] in fe3l and low[i - 2] in mobtada and low[i] not in tme3rab and low[i] not in hrofgar) \
+                or (low[i - 1] in fa3el and low[i - 2] in fe3lmad and low[i] not in tme3rab and low[i] not in hrofgar) \
+                or ("ta2" in fa3el and low[i - 1] in fe3lmad):
+            maf3ol_beh.append(low[i])
+            tme3rab.append(low[i])
+            ekraa = ekraa + "\n" + low[i] + ": مفعول به منصوب بالفتحة"
+        if match2 and low[i - 1].endswith(u"ت") and len(maf3ol_beh) < 1 and low[i] not in tme3rab \
+                and low[i - 1] not in hrofgar:
+            fa3el.append("ta2")
+            maf3ol_beh.append(low[i])
+            tme3rab.append(low[i])
+            ekraa = ekraa + "\n" + "و التاء ضمير متصل مبني في محل رفع فاعل"
+            ekraa = ekraa + "\n" + low[i] + ": مفعول به منصوب بالفتحة"
+        if low[i] in hrofgar and low[i] not in tme3rab:
+            tme3rab.append(low[i])
+            ekraa = ekraa + "\n" + low[i] + ": حرف جر "
+        if match2 and low[i - 1] in hrofgar:
+            esmmgror.append(low[i])
+            tme3rab.append(low[i])
+            ekraa = ekraa + "\n" + low[i] + ": اسم مجرور بالكسرة"
+        label.config(text=ekraa, anchor="ne")
+
+
+def send_report():
+    global entry
+    global label
+
+    reports = entry.get()
+    mail = smtplib.SMTP('smtp.gmail.com', 587)
+    mail.ehlo()
+    mail.starttls()
+    mail.login("Drakth5364", "abdoabdo5364")
+    mail.sendmail("Drakth5364@gmail.com", "Drakth5364@gmail.com",
+                  "Subject:اعراب الجمل: اعرابات خاطئة\n\n\n{0}".format(reports).encode("UTF-8"))
+    mail.quit()
+    if True:
+        top = tk.Toplevel()
+        top.geometry("260x100")
+        top.iconbitmap("NahwIcon.ico")
+        background_image2 = tk.PhotoImage(file="NahwIcon.PNG")
+        background_label2 = tk.Label(top, image=background_image2)
+        background_label2.place(relwidth=1, relheight=1)
+
+        canvass = tk.Canvas(top, height=HEIGHT, width=WIDTH)
+        canvass.pack()
+
+        top.title("الابلاغ عن الجملة")
+        background_imagee = tk.PhotoImage(file="Guiiyy.PNG")
+        background_labele = tk.Label(top, image=background_imagee)
+        background_labele.place(relwidth=1, relheight=1)
+
+        framee = tk.Frame(top)
+        framee.place(relwidth=1, relheight=1)
+
+        texte = tk.Label(framee, text="تم ارسال الجملة للمراجعة")
+        texte.place(relwidth=1, relheight=1)
+
+
+backframe = tk.Frame(root)
+backframe.place(relwidth=1, relheight=1)
+
+
+background_image = tk.PhotoImage(file="Guiiyy.PNG")
+background_label = tk.Label(backframe, image=background_image)
+background_label.place(relwidth=1, relheight=1)
+background_label.pack(expand=True)
+
+frame = tk.Frame(root, bg="#271203", bd=5)
+frame.place(relx=0.5, rely=0.1, relwidth=0.75, relheight=0.1, anchor="n")
+
+entry = tk.Entry(frame, bg="#F4D5BE")
+entry.place(relwidth=0.68, relheight=1)
+
+lower_frame = tk.Frame(root, bg="#271203", bd=5)
+lower_frame.place(relx=0.5, rely=0.25, relwidth=0.75, relheight=0.6, anchor="n")
+
+lower2_frame = tk.Frame(root, bg="#271203", bd=1)
+lower2_frame.place(relx=0.2, rely=0.98, relwidth=0.25, relheight=0.1, anchor="s")
+
+lower3_frame = tk.Frame(root, bg="#FCF4E3")
+lower3_frame.place(relx=0.73, rely=0.90, relwidth=0.12, relheight=0.06, anchor="n")
+
+label = tk.Label(lower_frame, bg="#F4D5BE", font="bold 13")
+label.place(relwidth=1, relheight=1)
+
+button = tk.Button(frame, text="اعرب الجملة", font="bold", bg="#9D7A60", command=e3rab)
+button.place(relx=0.7, rely=0.0, relwidth=0.3, relheight=1.05)
+
+button2 = tk.Button(lower2_frame, text="الابلاغ عن الجملة", font=40, bg="#9D7A60", fg="#271203", command=send_report)
+button2.place(relwidth=1, relheight=1)
+
+version = tk.Label(lower3_frame, text="v.0.1", bg="#FCF4E3", font="5")
+version.place(relwidth=1, relheight=1)
+
+root.mainloop()

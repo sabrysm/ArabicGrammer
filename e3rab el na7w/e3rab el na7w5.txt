@@ -1,0 +1,60 @@
+﻿import re
+pattern1 = u"^ي"
+pattern2 = u"(^ال)"
+pattern3 = u"$(ت)"
+pattern4 = u"[أدجحخهعغفقثصضشستنمكطظزوةىرؤءئذ]"
+pattern5 = u"(في)*(من)*(إلى)*"
+sentence = u"أحمد يشرب اللبن"
+low = sentence.split(" ")
+mobtada = []
+fe3l = []
+fa3el = []
+fe3lmad = []
+maf3ol_beh = []
+tme3rab = []
+hrofgar = []
+esmmgror = []
+print(sentence, " "*4, "\n")
+for i in range(len(low)):
+    match1 = re.match(pattern1, low[i])
+    match2 = re.match(pattern2, low[i])
+    match3 = re.match(pattern3, low[i])
+    match4 = re.match(pattern4, low[i])
+    match5 = re.match(pattern5, low[i])
+    if match1 and len(fe3l) < 1 and low[i] not in tme3rab:
+        fe3l.append(low[i])
+        tme3rab.append(low[i])
+        print(low[i], u": فعل مضارع مرفوع بالضمة")
+    if low[i].endswith(u"ت") and low[i] not in tme3rab:
+        fe3lmad.append(low[i])
+        tme3rab.append(low[i])
+        print(low[i], u": فعل ماض مبني على الفتح")
+    if ((match2 or match4) and len(fe3l) > 0 and re.match(pattern1, low[i-1]) and len(fa3el) < 1 and len(mobtada) != 1 and low[i] not in tme3rab) or (match4 and low[i].endswith(u"ة") and low[i-1].endswith(u"ت") and "ta2" not in fa3el and len(fa3el) < 1 and len(mobtada) != 1 and low[i] not in tme3rab):
+        fa3el.append(low[i])
+        tme3rab.append(low[i])
+        print(low[i], u": فاعل مرفوع بالضمة")
+    if ((match2 or match4) and re.match((pattern1 or pattern2), low[i-1]) and re.match(pattern4, low[i-2]) and len(fe3l) == 1 and low[i] not in tme3rab) or (match2 and re.match(pattern4, low[i-1]) and re.match(pattern1, low[i-2]) and len(maf3ol_beh) < 1 and len(fe3l) == 1 and low[i] not in tme3rab):
+        maf3ol_beh.append(low[i])
+        tme3rab.append(low[i])
+        print(low[i], u": مفعول به منصوب بالفتحة")
+    if (match2 and low[i-1].endswith(u"ت") and len(maf3ol_beh) < 1 and low[i] not in tme3rab):
+        fa3el.append("ta2")
+        maf3ol_beh.append(low[i])
+        tme3rab.append(low[i])
+        print(u"و التاء ضمير متصل مبني في محل رفع فاعل")
+        print(low[i], u": مفعول به منصوب بالفتحة")
+    if (low[i - 1].endswith(u"ت") and len(fa3el) != 1 and "ta2" not in fa3el) or (low[i - 1] in maf3ol_beh and low[i - 2].endswith(u"ت") and "ta2" not in fa3el):
+        fa3el.append("ta2")
+        print(u"و التاء ضمير متصل مبني في محل رفع فاعل")
+    if (match2 or match4) and i == 0 and len(mobtada) < 1 and low[i] not in tme3rab and low[i] != (u"في" or u"من" or u"إلى"):
+        mobtada.append(low[i])
+        tme3rab.append(low[i])
+        print(low[i], u": مبتدأ مرفوع بالضمة")
+    if (match5 and re.match((pattern4 or pattern2), low[i-1]) and len(hrofgar) < 1 and low[i] not in tme3rab and low[i] == (u"في" or u"من" or u"إلى")) or (match5 and low[i-1].endswith(u"ت") and len(hrofgar) < 1 and low[i] not in tme3rab and low[i] == (u"في" or u"من" or u"إلى")) or (match5 and re.match(pattern2, low[i-1]) and low[i-2].endswith(u"ت") and len(hrofgar) < 1 and low[i] not in tme3rab and low[i] == (u"في" or u"من" or u"إلى")) or (match5 and re.match(pattern2, low[i-1]) and re.match(pattern2, low[i-2]) and re.match(pattern1, low[i-3]) and len(fe3lmad) < 1 and len(hrofgar) < 1 and low[i] not in tme3rab and low[i] == (u"في" or u"من" or u"إلى")) or (match5 and re.match(pattern2, low[i-1]) and re.match(pattern1, low[i-2]) and len(fe3lmad) < 1 and len(hrofgar) < 1 and low[i] not in tme3rab and low[i] == (u"في" or u"من" or u"إلى")) or (match5 and re.match(pattern2, low[i-1]) and re.match(pattern4, low[i-2]) and re.match(pattern1, low[i-3]) and len(fe3lmad) < 1 and len(hrofgar) < 1 and low[i] not in tme3rab and low[i] == (u"في" or u"من" or u"إلى")) or (match5 and re.match(pattern4, low[i-1]) and re.match(pattern1, low[i-2]) and len(fe3lmad) < 1 and len(hrofgar) < 1 and low[i] not in tme3rab and low[i] == (u"في" or u"من" or u"إلى")):
+        hrofgar.append(low[i])
+        tme3rab.append(low[i])
+        print(low[i], u": حرف جر ")
+    if (match2 and re.match(pattern5, low[i-1]) and len(hrofgar) > 0 and re.match((pattern4 or pattern2 or pattern1), low[i-2]) and len(esmmgror) < 1  and low[i] not in tme3rab) or (match2 and re.match(pattern5, low[i]) and len(hrofgar) > 0 and len(maf3ol_beh) > 0):
+        esmmgror.append(low[i])
+        tme3rab.append(low[i])
+        print(low[i], u": اسم مجرور بالكسرة")

@@ -1,0 +1,38 @@
+﻿
+
+def report_bugs():
+    global entry
+    global label
+
+    top = tk.Toplevel()
+    top.geometry("300x200")
+    top.iconbitmap("NahwIcon.ico")
+    background_image2 = tk.PhotoImage(file="NahwIcon.PNG")
+    background_label2 = tk.Label(top, image=background_image2)
+    background_label2.place(relwidth=1, relheight=1)
+
+    canvass = tk.Canvas(top, height=HEIGHT, width=WIDTH)
+    canvass.pack()
+
+    top.title("الابلاغ عن الأخطاء")
+    background_imagee = tk.PhotoImage(file="Guiiyy.PNG")
+    background_labele = tk.Label(top, image=background_imagee)
+    background_labele.place(relwidth=1, relheight=1)
+
+    framee = tk.Frame(top)
+    framee.place(x=105, y=40)
+
+    texte = tk.Label(framee, text="اكتب الجملة التي بها أخطاء نحوية", font=40)
+    texte.grid(column=8, row=8)
+
+    lower_framee = tk.Frame(top, bg="#271203", bd=5)
+    lower_framee.place(relx=0.5, rely=0.4, relwidth=0.75, relheight=0.2, anchor="n")
+
+    lower2_framee = tk.Frame(top, bg="#271203", bd=5)
+    lower2_framee.place(x=150, y=150)
+
+    report_entry = tk.Entry(lower_framee, bg="#F4D5BE", font=80)
+    report_entry.place(relwidth=1, relheight=1)
+
+    buttone = tk.Button(lower2_framee, text="ارسل الجملة", font=40, bg="#9D7A60", command=send_report)
+    buttone.grid(column=6, row=80)
